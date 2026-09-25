@@ -8,9 +8,14 @@
 <link rel="icon" href="convoy/icon.png">
 <meta property="og:title" content="Convoy — a download manager for the Mac">
 <meta property="og:description" content="Segmented downloads, browser integration, and video streams that come back as one file. Free and open source, for macOS.">
-<meta property="og:image" content="https://thedynamicpunk.github.io/convoy/icon.png">
+<meta property="og:image" content="https://thedynamicpunk.github.io/convoy/social-preview.png">
+<meta property="og:image:width" content="2560">
+<meta property="og:image:height" content="1280">
+<meta property="og:image:alt" content="Convoy: a free, open-source download manager for macOS, shown with downloads running in parallel parts">
+<meta property="og:url" content="https://thedynamicpunk.github.io/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://thedynamicpunk.github.io/convoy/social-preview.png">
 <style>
 :root{
   --bg:#0b0c0e; --surface:#131519; --surface-2:#191c21; --line:rgba(255,255,255,.09);
@@ -174,6 +179,10 @@ p{margin:0}
 .shot-stage img{
   display:block; width:100%; height:auto; border-radius:10px;
   filter:drop-shadow(0 18px 40px rgba(0,0,0,.55));
+}
+.shot-stage video{
+  display:block; width:100%; height:auto; aspect-ratio:1600/906; border-radius:10px;
+  background:var(--surface); box-shadow:0 18px 40px -10px rgba(0,0,0,.55);
 }
 .shot-ph{
   display:none; aspect-ratio:16/10; place-items:center; text-align:center; padding:24px;
@@ -431,6 +440,14 @@ pre code{background:none; border:0; padding:0; font-size:13px}
     <p class="eyebrow">A look at it</p>
     <div class="sec-head"><h2>Built like a Mac app, because it is one.</h2></div>
     <div class="shots">
+      <figure class="shot">
+        <div class="shot-stage">
+          <video id="demo" src="screenshots/demo.mp4" poster="screenshots/demo-poster.jpg"
+                 autoplay muted loop playsinline preload="metadata"
+                 aria-label="Convoy taking a download from Chrome, pausing and resuming it, then grabbing a video from a web page, with both downloads running in parallel parts"></video>
+        </div>
+        <figcaption class="shot-cap"><b>In 25 seconds</b>A download handed over from the browser, paused and resumed, then a video picked off a web page &mdash; both fetched in parallel parts.</figcaption>
+      </figure>
       <figure class="shot">
         <div class="shot-stage">
           <img src="screenshots/queue.jpg" alt="The Convoy download queue" onerror="this.closest('.shot').classList.add('shot--empty')">
@@ -782,6 +799,27 @@ pre code{background:none; border:0; padding:0; font-size:13px}
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) { if (j) apply(j); })
     .catch(function () {});
+})();
+
+/* The demo video: no autoplay for reduced motion (controls instead), and it
+   only plays while it is on screen. */
+(function () {
+  'use strict';
+  var v = document.getElementById('demo');
+  if (!v) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    v.removeAttribute('autoplay');
+    v.pause();
+    v.controls = true;
+    return;
+  }
+  if (!('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      else v.pause();
+    });
+  }, { threshold: 0.25 }).observe(v);
 })();
 
 /* The hero card's segmented download: one run from 25% to 80%, then it starts
