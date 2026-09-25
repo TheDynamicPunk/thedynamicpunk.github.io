@@ -2,5 +2,13 @@
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>Convoy</title>
+        <item>
+            <title>1.0.0</title>
+            <pubDate>Fri, 25 Sep 2026 21:29:11 +0530</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.0.0/Convoy-1.0.0.zip" length="4584279" type="application/octet-stream" sparkle:edSignature="LF76/FrB94Cr4e78sZu5kVJg4lmaeFy+v8zmGjIMV9RAm9CNp1l6CV7TNl8GWZn5dbNgLhHnxo6ppQE7muCzDQ=="/>
+        </item>
     </channel>
 </rss>
