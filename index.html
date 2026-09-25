@@ -298,8 +298,8 @@ pre code{background:none; border:0; padding:0; font-size:13px}
 /* footer */
 .ftr{border-top:1px solid var(--line); padding:44px 0 56px; margin-top:20px}
 .ftr-in{display:flex; gap:20px; align-items:baseline; flex-wrap:wrap}
-.ftr-in .eyebrow{margin-right:auto}
-.ftr-links{display:flex; gap:22px}
+#dlCount{color:var(--faint)}
+.ftr-links{display:flex; gap:22px; margin-left:auto}
 .ftr a{font-size:14px; color:var(--muted); text-decoration:none}
 .ftr a:hover{color:var(--text)}
 .fine{margin-top:26px; font-size:12.5px; color:var(--faint); max-width:70ch; line-height:1.65}
@@ -649,7 +649,7 @@ pre code{background:none; border:0; padding:0; font-size:13px}
         </ul>
       </div>
       <div class="panel panel--warn">
-        <h3>What it doesn't do</h3>
+        <h3>What it doesn't do (yet..)</h3>
         <ul>
           <li><b>Safari.</b> Apple's extension route needs a paid certificate.</li>
           <li><b>Firefox.</b> Needs its own build of the extension; not there yet.</li>
@@ -667,6 +667,7 @@ pre code{background:none; border:0; padding:0; font-size:13px}
   <div class="wrap">
     <div class="ftr-in">
       <p class="eyebrow" id="ftrVersion">Convoy · v1.0.0</p>
+      <p class="eyebrow" id="dlCount" hidden></p>
       <nav class="ftr-links">
         <a href="https://github.com/TheDynamicPunk/Convoy">Source</a>
         <a href="https://github.com/TheDynamicPunk/Convoy/issues">Report an issue</a>
@@ -742,6 +743,28 @@ pre code{background:none; border:0; padding:0; font-size:13px}
   }
 
   apply(C);
+
+  // GitHub tallies every release-asset fetch. Read it back and show the
+  // installer total, but only once it is a number worth showing.
+  (function () {
+    var el = document.getElementById('dlCount');
+    var MIN = 100;
+    if (!el || !C.repo) return;
+    fetch('https://api.github.com/repos/' + C.repo + '/releases')
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (releases) {
+        var n = 0;
+        releases.forEach(function (rel) {
+          (rel.assets || []).forEach(function (a) {
+            if (/\.(pkg|dmg)$/.test(a.name)) n += a.download_count;
+          });
+        });
+        if (n < MIN) return;                       // too early: leave it hidden
+        el.textContent = n.toLocaleString() + ' downloads';
+        el.hidden = false;
+      })
+      .catch(function () {});                      // rate-limited or offline: stay hidden
+  })();
 
   // the hero button starts the download and moves them to the steps for it
   (function () {
