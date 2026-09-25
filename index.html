@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convoy — a download manager for the Mac</title>
+<meta name="description" content="Convoy splits every file into as many as sixteen segments and fetches them at once, and picks downloads up straight from your browser — cookies, logins and all. Free and open source, for macOS.">
+<link rel="icon" href="convoy/icon.png">
+<meta property="og:title" content="Convoy — a download manager for the Mac">
+<meta property="og:description" content="Segmented downloads, browser integration, and video streams that come back as one file. Free and open source, for macOS.">
+<meta property="og:image" content="https://thedynamicpunk.github.io/convoy/icon.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  --bg:#0b0c0e; --surface:#131519; --surface-2:#191c21; --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.16);
+  --text:#f2f4f7; --muted:#99a2ac; --faint:#6b737d;
+  --accent:#0a84ff; --accent-soft:rgba(10,132,255,.13);
+  --radius:14px; --gutter:24px; --max:1140px;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:inherit}
+h1,h2,h3{margin:0; font-weight:640; letter-spacing:-.025em; line-height:1.15}
+p{margin:0}
+.wrap{max-width:var(--max); margin:0 auto; padding:0 var(--gutter)}
+.eyebrow{
+  font-family:var(--mono); font-size:11.5px; font-weight:500; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--faint);
+}
+.rule{height:1px; background:var(--line); border:0; margin:0}
+
+/* header */
+.hdr{
+  position:sticky; top:0; z-index:50; background:rgba(11,12,14,.72);
+  backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.hdr-in{display:flex; align-items:center; gap:12px; height:56px}
+.mark{display:flex; align-items:center; gap:10px; text-decoration:none}
+.mark img{width:26px; height:26px; border-radius:6px; display:block}
+.mark b{font-size:16px; font-weight:640; letter-spacing:-.02em}
+.tag{
+  font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  white-space:nowrap; flex:none;
+  color:var(--muted); border:1px solid var(--line-strong); border-radius:5px; padding:3px 7px;
+}
+.hdr-links{margin-left:auto; display:flex; align-items:center; gap:22px}
+.hdr-links a{font-size:14.5px; color:var(--muted); text-decoration:none; transition:color .15s}
+.hdr-links a:hover{color:var(--text)}
+
+/* hero */
+.hero{padding:80px 0 84px; position:relative; overflow:hidden}
+.hero::after{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
+  background:radial-gradient(780px 440px at 16% -10%, rgba(10,132,255,.11), transparent 70%);
+}
+.hero-in{display:grid; grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr); gap:clamp(32px,5vw,64px); align-items:center}
+.hero h1{font-size:clamp(2.5rem,5.4vw,4rem); font-weight:680; letter-spacing:-.038em; line-height:1.05; margin:18px 0 0}
+.lede{font-size:clamp(1.02rem,2vw,1.18rem); color:var(--muted); max-width:44ch; margin-top:20px; line-height:1.55}
+.cta{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:30px}
+.btn{
+  display:inline-flex; flex-direction:column; align-items:center; gap:1px;
+  background:#fff; color:#0b0c0e; text-decoration:none;
+  padding:13px 26px; border-radius:11px; font-weight:620; font-size:16px;
+  letter-spacing:-.01em; transition:transform .12s ease, box-shadow .2s ease;
+  box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 8px 24px -8px rgba(0,0,0,.6);
+}
+.btn:hover{transform:translateY(-1px); box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 12px 30px -8px rgba(0,0,0,.7)}
+.btn small{font-family:var(--mono); font-size:10.5px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; opacity:.55}
+.btn-ghost{
+  display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--text);
+  border:1px solid var(--line-strong); border-radius:11px; padding:13px 20px;
+  font-size:15px; font-weight:520; transition:border-color .15s, background .15s;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3); background:var(--surface)}
+.meta{margin-top:20px; font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.04em}
+.meta b{color:var(--muted); font-weight:500}
+.hero-note{margin-top:12px; font-size:13.5px; color:var(--faint); max-width:50ch; line-height:1.55}
+.hero-note a{color:var(--muted); text-decoration:underline; text-underline-offset:2px}
+.hero-note a:hover{color:var(--text)}
+
+/* hero artwork: the download rows, rebuilt in CSS so the type stays crisp */
+.hero-art{position:relative; min-width:0}
+.hero-art::before{
+  content:""; position:absolute; inset:-14% -9%; z-index:-1;
+  background:radial-gradient(58% 54% at 58% 42%, rgba(10,132,255,.18), transparent 70%);
+}
+.dlcard{
+  min-width:0; border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background:linear-gradient(170deg,#191c21,#141619 60%,#121417);
+  box-shadow:0 30px 70px -34px rgba(0,0,0,.95);
+}
+.dlrow{display:flex; gap:13px; padding:15px 17px; align-items:flex-start}
+.dlrow + .dlrow{border-top:1px solid rgba(255,255,255,.055)}
+.dlrow--sel{background:rgba(255,255,255,.045)}
+.dlicon{
+  width:31px; height:31px; border-radius:8px; flex:none; position:relative;
+  display:grid; place-items:center;
+}
+.dlicon svg{width:15px; height:15px; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.dlicon--box{background:linear-gradient(160deg,#5c3f20,#3a2814)}
+.dlicon--box svg{stroke:#e8913a}
+.dlicon--doc{background:rgba(255,255,255,.075)}
+.dlicon--doc svg{stroke:#9aa3ad}
+.dlicon--video{background:linear-gradient(160deg,#3b2052,#271635)}
+.dlicon--video svg{stroke:#c45cf0}
+.dlicon::after{
+  content:""; position:absolute; right:-4px; bottom:-4px; width:13px; height:13px;
+  border-radius:50%; border:2.5px solid #16181c; background:var(--accent);
+}
+.dlrow--paused .dlicon::after{background:#e8b52e}
+.dlbody{flex:1; min-width:0}
+.hero-copy{min-width:0}
+.dlhead{display:flex; align-items:center; gap:8px}
+.dlname{
+  font-size:12.5px; font-weight:620; letter-spacing:-.005em; color:#eef1f4;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+}
+.dlbadge{
+  font-family:var(--mono); font-size:8.5px; font-style:normal; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; padding:2.5px 6px; border-radius:4px;
+  flex:none; color:#5cb0ff; background:rgba(10,132,255,.17);
+}
+.dlrow--paused .dlbadge{color:#f0c65a; background:rgba(232,181,46,.16)}
+.dlpct{margin-left:auto; font-size:12px; font-weight:620; color:var(--muted); flex:none}
+.bar{margin-top:9px; height:7px; border-radius:3px; overflow:hidden; background:rgba(255,255,255,.08)}
+.bar > i{display:block; height:100%; border-radius:3px; background:var(--accent)}
+.bar--ticks{
+  border-radius:2px;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.11) 0 5px, transparent 5px 8px);
+}
+.bar--ticks > i{
+  border-radius:0; width:var(--p);
+  background:repeating-linear-gradient(90deg, var(--accent) 0 5px, transparent 5px 8px);
+  animation:creep 4s ease-in-out infinite alternate;
+}
+.bar--paused > i{width:88%; background:linear-gradient(90deg,#c9971f,#f2c85a)}
+.segs{margin-top:9px; display:grid; grid-template-columns:repeat(8,1fr); gap:4px}
+.segs{opacity:var(--segdim,1)}
+.segs i{height:7px; border-radius:2px; background:rgba(255,255,255,.08); position:relative; overflow:hidden}
+.segs i::after{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:var(--p);
+  border-radius:2px; background:var(--accent);
+}
+@keyframes creep{ from{width:calc(var(--p) * .9)} to{width:var(--p)} }
+.dlstats{
+  margin-top:8px; display:flex; gap:4px 12px; flex-wrap:wrap; min-width:0;
+  font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.02em;
+}
+@media (prefers-reduced-motion:reduce){ .bar--ticks > i, .segs i::after{animation:none} }
+
+/* sections */
+.sec{padding:84px 0}
+.sec-head{max-width:56ch}
+.sec-head h2{font-size:clamp(1.6rem,3.4vw,2.1rem); margin-top:16px}
+.sec-head p{color:var(--muted); margin-top:14px; font-size:16.5px}
+
+/* screenshots */
+.shots{display:grid; gap:56px; margin-top:48px}
+.shot{margin:0}
+.shot-stage{
+  padding:clamp(16px,3vw,34px); border:1px solid var(--line); border-radius:18px;
+  background:linear-gradient(170deg,rgba(255,255,255,.045),rgba(255,255,255,.008) 60%,transparent);
+}
+.shot-stage img{
+  display:block; width:100%; height:auto; border-radius:10px;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.55));
+}
+.shot-ph{
+  display:none; aspect-ratio:16/10; place-items:center; text-align:center; padding:24px;
+  border:1px dashed var(--line-strong); border-radius:10px;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 12px,transparent 12px 24px);
+}
+.shot--empty .shot-stage img{display:none}
+.shot--empty .shot-ph{display:grid}
+.shot-ph span{font-family:var(--mono); font-size:12px; color:var(--faint); line-height:1.9}
+.shot-cap{padding:20px 4px 0; font-size:14.5px; color:var(--muted); max-width:62ch}
+.shot-cap b{color:var(--text); font-weight:620; display:block; margin-bottom:3px; font-size:15.5px}
+
+/* features */
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:44px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+.card{background:var(--bg); padding:28px 24px 30px}
+.card svg{width:19px; height:19px; stroke:var(--accent); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
+.card h3{font-size:16.5px; margin-top:16px; font-weight:620}
+.card p{font-size:14.5px; color:var(--muted); margin-top:9px; line-height:1.58}
+
+/* steps */
+.steps{counter-reset:s; margin-top:40px; display:grid; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+.step{background:var(--bg); padding:24px 26px; display:flex; gap:20px; align-items:flex-start}
+.step::before{
+  counter-increment:s; content:counter(s,decimal-leading-zero);
+  font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.06em;
+  padding-top:3px; flex:none;
+}
+.step h3{font-size:15.5px; font-weight:620}
+.step p{font-size:14.5px; color:var(--muted); margin-top:6px}
+code{
+  font-family:var(--mono); font-size:.87em; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:5px; padding:1.5px 6px; color:#cfd6de;
+}
+pre{
+  margin:14px 0 0; background:var(--surface); border:1px solid var(--line); border-radius:9px;
+  padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; color:#cfd6de;
+}
+pre code{background:none; border:0; padding:0; font-size:13px}
+
+/* two-col */
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:44px}
+.panel{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); padding:28px}
+.panel h3{font-size:16px; font-weight:620}
+.panel ul{margin:16px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:11px}
+.panel li{font-size:14.5px; color:var(--muted); padding-left:20px; position:relative; line-height:1.55}
+.panel li::before{content:""; position:absolute; left:0; top:9px; width:7px; height:1.5px; background:var(--faint)}
+.panel li b{color:var(--text); font-weight:600}
+.panel--warn li::before{background:#d97757}
+
+/* install tabs */
+.tabs > input{position:absolute; opacity:0; pointer-events:none}
+.tablist{display:flex; gap:8px; margin-top:38px; flex-wrap:wrap}
+.tablist label{
+  display:inline-flex; align-items:baseline; gap:9px; cursor:pointer;
+  border:1px solid var(--line); border-radius:10px; padding:11px 18px;
+  font-size:15px; font-weight:560; color:var(--muted);
+  transition:color .15s, border-color .15s, background .15s;
+}
+.tablist label span{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--faint)}
+.tablist label:hover{color:var(--text); border-color:var(--line-strong)}
+.tabs > input:focus-visible + input + .tablist label:first-child,
+.tabs > input:nth-child(2):focus-visible ~ .tablist label:nth-child(2){outline:2px solid var(--accent); outline-offset:2px}
+#tab-pkg:checked ~ .tablist label[for="tab-pkg"],
+#tab-dmg:checked ~ .tablist label[for="tab-dmg"]{
+  color:#0b0c0e; background:#fff; border-color:#fff;
+}
+#tab-pkg:checked ~ .tablist label[for="tab-pkg"] span,
+#tab-dmg:checked ~ .tablist label[for="tab-dmg"] span{color:rgba(11,12,14,.5)}
+.tabpanel{display:none}
+#tab-pkg:checked ~ .panel-pkg, #tab-dmg:checked ~ .panel-dmg{display:block}
+.recommend{
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-soft); border-radius:4px; padding:2.5px 7px; margin-left:2px;
+}
+#tab-pkg:checked ~ .tablist label[for="tab-pkg"] .recommend{color:#0a84ff; background:rgba(10,132,255,.14)}
+
+/* the Gatekeeper screen, with the button called out */
+.gk{
+  margin:26px 0 0; max-width:660px;
+  border:1px solid var(--line); border-radius:16px; padding:clamp(12px,1.8vw,18px);
+  background:linear-gradient(170deg, rgba(255,255,255,.05), rgba(255,255,255,.012) 60%, transparent);
+}
+.gk-frame{position:relative; border-radius:10px; overflow:hidden; line-height:0}
+.gk-frame img{display:block; width:100%; height:auto}
+.gk-anno{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+.gk-ring{fill:none; stroke:#ff7a1a; stroke-width:6; animation:gkpulse 1.9s ease-in-out infinite}
+.gk-line{fill:none; stroke:#ff7a1a; stroke-width:7; stroke-linecap:round}
+.gk-chip{fill:#ff7a1a}
+.gk-text{fill:#fff; font-family:var(--sans); font-size:34px; font-weight:650; letter-spacing:-.01em}
+@keyframes gkpulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){ .gk-ring{animation:none} }
+.gk-cap{
+  margin-top:14px; padding-top:13px; border-top:1px solid var(--line);
+  font-size:13.5px; color:var(--muted); line-height:1.55;
+}
+.gk-cap b{color:var(--text); font-weight:620}
+
+/* download */
+.dl{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-top:40px}
+.dl-row{display:flex; align-items:center; gap:20px; padding:22px 24px; background:var(--surface)}
+.dl-row + .dl-row{border-top:1px solid var(--line)}
+.dl-info h3{font-size:16px; font-weight:620}
+.dl-info p{font-family:var(--mono); font-size:12px; color:var(--faint); margin-top:5px; letter-spacing:.03em}
+.dl-btn{
+  margin-left:auto; flex:none; text-decoration:none; color:var(--text); font-size:14.5px; font-weight:560;
+  border:1px solid var(--line-strong); border-radius:9px; padding:10px 20px; transition:background .15s, border-color .15s;
+}
+.dl-btn:hover{background:var(--surface-2); border-color:rgba(255,255,255,.3)}
+.dl-notes{padding:20px 24px; background:var(--bg); border-top:1px solid var(--line); display:flex; flex-direction:column; gap:11px}
+.dl-notes p{font-size:14px; color:var(--muted); padding-left:20px; position:relative; line-height:1.55}
+.dl-notes p::before{content:""; position:absolute; left:0; top:9px; width:7px; height:1.5px; background:var(--faint)}
+
+/* footer */
+.ftr{border-top:1px solid var(--line); padding:44px 0 56px; margin-top:20px}
+.ftr-in{display:flex; gap:20px; align-items:baseline; flex-wrap:wrap}
+.ftr-in .eyebrow{margin-right:auto}
+.ftr-links{display:flex; gap:22px}
+.ftr a{font-size:14px; color:var(--muted); text-decoration:none}
+.ftr a:hover{color:var(--text)}
+.fine{margin-top:26px; font-size:12.5px; color:var(--faint); max-width:70ch; line-height:1.65}
+
+@media (max-width:860px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .cols{grid-template-columns:1fr}
+  .hero-in{grid-template-columns:minmax(0,1fr); gap:46px}
+  .hero-art{max-width:min(470px,100%)}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  :root{--gutter:18px}
+  .hero{padding:64px 0 52px}
+  .sec{padding:64px 0}
+  .grid{grid-template-columns:1fr}
+  .tag{display:none}
+  .hdr-links{gap:18px}
+  .hdr-links a[href="#features"]{display:none}
+  .cta{gap:12px}
+  .btn,.btn-ghost{width:100%; text-align:center; justify-content:center}
+  .dl-row{flex-wrap:wrap; gap:14px}
+  .dl-btn{margin-left:0; width:100%; text-align:center}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="mark" href="/">
+      <img src="convoy/icon.png" alt="">
+      <b>Convoy</b>
+    </a>
+    <span class="tag" id="stateTag">v1.0.0</span>
+    <nav class="hdr-links">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/TheDynamicPunk/Convoy" id="lnkRepo">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <p class="eyebrow">Download manager · macOS</p>
+      <h1>Stop waiting<br>on downloads.</h1>
+      <p class="lede">
+        Convoy splits every file into as many as sixteen segments and fetches them
+        at once — and it picks downloads up straight from your browser, cookies,
+        logins and all.
+      </p>
+
+      <div class="cta">
+        <a class="btn" href="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.0.0/Convoy-1.0.0.pkg" id="ctaPrimary">
+          Download for macOS
+          <small id="ctaSub">Universal · 4.2 MB</small>
+        </a>
+        <a class="btn-ghost" href="#install">Install guide</a>
+      </div>
+
+      <p class="meta" id="metaLine"><b>v1.0.0</b> · 25 September 2026 · macOS 14+</p>
+      <p class="hero-note">Free and open source, GPLv3. Not signed with an Apple
+      certificate yet — the <a href="#install">install guide</a> covers the first launch.</p>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="dlcard">
+
+        <div class="dlrow">
+          <span class="dlicon dlicon--video"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M8 5v14M16 5v14M3 12h18"/></svg></span>
+          <div class="dlbody">
+            <div class="dlhead">
+              <b class="dlname">Serene Waterfalls.mp4</b>
+              <em class="dlbadge">Downloading</em>
+              <span class="dlpct">36%</span>
+            </div>
+            <div class="bar bar--ticks"><i style="--p:36%"></i></div>
+            <div class="dlstats"><span>69.2 MB</span><span>2.0 MB/s</span><span>0:10 left</span><span>27 of 73 parts</span></div>
+          </div>
+        </div>
+
+        <div class="dlrow dlrow--sel" data-anim="segments">
+          <span class="dlicon dlicon--box"><svg viewBox="0 0 24 24"><path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z"/><path d="M3 4.5h18V8H3z"/><path d="M10 12h4"/></svg></span>
+          <div class="dlbody">
+            <div class="dlhead">
+              <b class="dlname">elementaryos-8.1-stable-arm64.iso</b>
+              <em class="dlbadge">Downloading</em>
+              <span class="dlpct" data-pct>25%</span>
+            </div>
+            <div class="segs">
+              <i style="--p:28.0%"></i>
+              <i style="--p:23.5%"></i>
+              <i style="--p:26.5%"></i>
+              <i style="--p:22.0%"></i>
+              <i style="--p:28.7%"></i>
+              <i style="--p:24.2%"></i>
+              <i style="--p:25.8%"></i>
+              <i style="--p:22.5%"></i>
+            </div>
+            <div class="dlstats"><span data-bytes>0.8 GB / 3.0 GB</span><span>11.6 MB/s</span><span data-eta>3:19 left</span><span>8 segments</span></div>
+          </div>
+        </div>
+
+        <div class="dlrow dlrow--paused">
+          <span class="dlicon dlicon--video"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M8 5v14M16 5v14M3 12h18"/></svg></span>
+          <div class="dlbody">
+            <div class="dlhead">
+              <b class="dlname">Big Buck Bunny 720p.mp4</b>
+              <em class="dlbadge">Paused</em>
+            </div>
+            <div class="bar bar--paused"><i></i></div>
+            <div class="dlstats"><span>240.1 MB / 271.3 MB</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section class="sec">
+  <div class="wrap">
+    <p class="eyebrow">A look at it</p>
+    <div class="sec-head"><h2>Built like a Mac app, because it is one.</h2></div>
+    <div class="shots">
+      <figure class="shot">
+        <div class="shot-stage">
+          <img src="screenshots/queue.jpg" alt="The Convoy download queue" onerror="this.closest('.shot').classList.add('shot--empty')">
+          <div class="shot-ph"><span>screenshots/queue.jpg<br>the main window — several downloads running at different progress</span></div>
+        </div>
+        <figcaption class="shot-cap"><b>The queue</b>Every download broken into its parts as it arrives — speed, what&rsquo;s left, and how many segments are done. Filter by status, search by name.</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="shot-stage">
+          <img src="screenshots/browser.jpg" alt="Convoy capturing a download from the browser" onerror="this.closest('.shot').classList.add('shot--empty')">
+          <div class="shot-ph"><span>screenshots/browser.jpg<br>the extension catching a download, or the video button on a page</span></div>
+        </div>
+        <figcaption class="shot-cap"><b>From the browser</b>Downloads, right-click menus for links and media, and a button over any video it finds.</figcaption>
+      </figure>
+      <figure class="shot">
+        <div class="shot-stage">
+          <img src="screenshots/video.jpg" alt="Convoy picking a video format" onerror="this.closest('.shot').classList.add('shot--empty')">
+          <div class="shot-ph"><span>screenshots/video.jpg<br>the format picker, or a stream being merged</span></div>
+        </div>
+        <figcaption class="shot-cap"><b>Video, sorted out</b>Pick a resolution; separate audio and video tracks are fetched in parallel and merged afterwards.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section class="sec" id="features">
+  <div class="wrap">
+    <p class="eyebrow">What it does</p>
+    <div class="sec-head">
+      <h2>The parts that matter, done properly.</h2>
+      <p>No account, no telemetry, no upsell. It downloads files and then gets out of the way.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+        <h3>Segmented downloads</h3>
+        <p>One file split into 1–16 segments, all fetched at once. Servers that won't do byte ranges fall back to a single stream automatically.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 9h17M3.5 15h17M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg>
+        <h3>Browser integration</h3>
+        <p>Chrome, Brave, Edge, Vivaldi, Opera, Arc and Chromium today, with more coming shortly. Cookies and headers come along, so downloads behind a login just work.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg>
+        <h3>Video streams</h3>
+        <p>If a page can play it, Convoy can fetch it. Every format we&rsquo;ve thrown at it, at least &mdash; and we&rsquo;ve thrown a lot.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 18.5h16"/></svg>
+        <h3>YouTube</h3>
+        <p>Through yt-dlp, which the app fetches on request from Settings and keeps current. Nothing is bundled.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><rect x="5" y="4" width="4" height="16" rx="1.2"/><rect x="15" y="4" width="4" height="16" rx="1.2"/></svg>
+        <h3>Pause and resume</h3>
+        <p>Start, stop, pause, resume &mdash; whenever you like. Quit halfway through and Convoy picks up exactly where you left off.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18.5" cy="17" r="2.5"/></svg>
+        <h3>Queue and menu bar</h3>
+        <p>Filter by status, search by name, and watch what's running from the menu bar with Pause All and Resume All.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 5h16s-2-1-2-5a6 6 0 0 0-6-6z"/><path d="M10.5 20a2 2 0 0 0 3 0"/></svg>
+        <h3>Notifications</h3>
+        <p>When a download finishes, with an optional sound. Light, dark, or whatever the system is doing.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M5 7h14l-1 13H6L5 7z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+        <h3>Storage cleanup</h3>
+        <p>Finds what interrupted downloads left behind and clears it when you ask. Nothing is deleted on its own.</p>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24"><path d="M12 3l7 3.5v5c0 4.5-3 8-7 9.5-4-1.5-7-5-7-9.5v-5L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <h3>Fully open source</h3>
+        <p>Every line of it is on GitHub, under the GPL. The download engine is a separate library you can use on its own.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section class="sec">
+  <div class="wrap">
+    <p class="eyebrow">How the browser part works</p>
+    <div class="sec-head">
+      <h2>Your browser hands the file over, and stops.</h2>
+      <p>Four steps, and you never think about any of them again.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>The extension catches the download</h3>
+        <p>A download starting, a right-click on a link or a video found on the page. It collects the URL, the referrer, and the cookies and headers that request would have used.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>It passes that to a small binary inside the app</h3>
+        <p>A native messaging host the browser launches directly — one of the two executables in the app bundle.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Which hands it straight to the app</h3>
+        <p>And that&rsquo;s it. Nothing to install, nothing to configure, nothing leaves your Mac. Yes, it really is that simple.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Convoy takes it from there</h3>
+        <p>It picks the download up and manages the rest &mdash; segments, speed, pause and resume.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section class="sec" id="install">
+  <div class="wrap">
+    <p class="eyebrow">Install</p>
+    <div class="sec-head">
+      <h2>Getting it running.</h2>
+      <p>Pick an installer, then add the extension to each browser you want it to watch.</p>
+    </div>
+
+    <div class="tabs">
+      <input type="radio" name="install" id="tab-pkg" checked>
+      <input type="radio" name="install" id="tab-dmg">
+
+      <div class="tablist">
+        <label for="tab-pkg">Installer <span>.PKG</span> <em class="recommend">Easiest</em></label>
+        <label for="tab-dmg">Disk image <span>.DMG</span></label>
+      </div>
+
+      <div class="tabpanel panel-pkg">
+        <div class="dl">
+          <div class="dl-row">
+            <div class="dl-info">
+              <h3>Convoy installer</h3>
+              <p id="dlSubPkg">Convoy-1.0.0.pkg &middot; 4.2 MB &middot; universal</p>
+            </div>
+            <a class="dl-btn" id="dlBtnPkg" href="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.0.0/Convoy-1.0.0.pkg">Download</a>
+          </div>
+          <div class="dl-notes">
+            <p><b>1.</b> Open the downloaded <code>.pkg</code>. macOS will refuse it the first time, because it isn&rsquo;t signed with an Apple certificate.</p>
+            <p><b>2.</b> Go to <b>System Settings &rarr; Privacy &amp; Security</b>, scroll down, and choose <b>Open Anyway</b> next to the blocked installer.</p>
+            <p><b>3.</b> Run through the installer. It asks for your admin password, and puts Convoy in <code>/Applications</code>.</p>
+            <p><b>4.</b> Open Convoy. <b>No further warnings</b> &mdash; the installer places the app without the quarantine flag, so the first launch is clean.</p>
+            <p>Why this one: fewer steps, and the app opens normally afterwards. The trade is that it asks for an admin password.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabpanel panel-dmg">
+        <div class="dl">
+          <div class="dl-row">
+            <div class="dl-info">
+              <h3>Disk image</h3>
+              <p id="dlSubDmg">Convoy-1.0.0.dmg &middot; 5.5 MB &middot; universal</p>
+            </div>
+            <a class="dl-btn" id="dlBtnDmg" href="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.0.0/Convoy-1.0.0.dmg">Download</a>
+          </div>
+          <div class="dl-notes">
+            <p><b>1.</b> Open the <code>.dmg</code> and drag <b>Convoy</b> onto the Applications folder.</p>
+            <p><b>2.</b> Open Convoy once. macOS refuses and offers only <b>Done</b> &mdash; that&rsquo;s expected.</p>
+            <p><b>3.</b> Go to <b>System Settings &rarr; Privacy &amp; Security</b>, scroll down, and choose <b>Open Anyway</b>. Do this <b>within an hour</b> of step 2, or start again.</p>
+            <p><b>4.</b> Confirm the second dialog and authenticate. Convoy opens, and won&rsquo;t ask again.</p>
+            <p>If macOS says the app is damaged, run <code>xattr -dr com.apple.quarantine /Applications/Convoy.app</code> and open it again.</p>
+            <p>No admin password needed, but more steps &mdash; and the warnings are worded alarmingly. They&rsquo;re the same warnings every un-notarized Mac app gets.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="gk">
+      <div class="gk-frame">
+        <img src="screenshots/gatekeeper.png"
+             alt="System Settings, Privacy &amp; Security, showing &ldquo;Convoy was blocked to protect your Mac&rdquo; with an Open Anyway button">
+        <svg class="gk-anno" viewBox="0 0 1480 1300" aria-hidden="true">
+          <defs>
+            <marker id="gkhead" viewBox="0 0 10 10" refX="7" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0 0 L10 5 L0 10 z" fill="#ff7a1a"/>
+            </marker>
+          </defs>
+          <rect class="gk-ring" x="1177" y="691" width="228" height="60" rx="13"/>
+          <rect class="gk-chip" x="505" y="1150" width="262" height="66" rx="14"/>
+          <text class="gk-text" x="636" y="1183" text-anchor="middle" dominant-baseline="central">Click this</text>
+          <path class="gk-line" d="M777 1178 C 940 1150, 1082 1012, 1146 794" marker-end="url(#gkhead)"/>
+        </svg>
+      </div>
+      <figcaption class="gk-cap"><b>Both routes pass through this screen.</b>
+      The button only appears after you&rsquo;ve tried to open Convoy (or its installer)
+      once &mdash; scroll down to the <b>Security</b> section to find it.</figcaption>
+    </figure>
+
+    <div class="dl" style="margin-top:22px">
+      <div class="dl-notes">
+        <p><b>macOS 14 (Sonoma) or later.</b> One universal build for Apple silicon and Intel.</p>
+        <p>Every release ships a <code>.sha256</code> beside each file if you want to check what you downloaded &mdash; and Convoy updates itself from here on, signed with its own key.</p>
+        <p>Convoy asks for no entitlements and no special permissions. It reads and writes the folder you download into, and talks to the browsers you set up.</p>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="panel">
+        <h3>Then the extension, once per browser</h3>
+        <ul>
+          <li>On first launch Convoy asks which browsers to set up. <b>Settings → Browser</b> does the same later.</li>
+          <li>Open the browser's extensions page — <code>chrome://extensions</code> — and turn on <b>Developer mode</b>.</li>
+          <li>Drag the folder Convoy points you at onto that page, or use <b>Load unpacked</b>. There's a button in Settings that opens it.</li>
+          <li>Convoy keeps that copy up to date on its own; browsers pick up changes when they restart.</li>
+        </ul>
+      </div>
+      <div class="panel panel--warn">
+        <h3>What it doesn't do</h3>
+        <ul>
+          <li><b>Safari.</b> Apple's extension route needs a paid certificate.</li>
+          <li><b>Firefox.</b> Needs its own build of the extension; not there yet.</li>
+          <li><b>The Mac App Store.</b> Doesn't allow apps in this category.</li>
+          <li><b>Torrents.</b> Convoy downloads over HTTP and HLS/DASH, nothing else.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-in">
+      <p class="eyebrow" id="ftrVersion">Convoy · v1.0.0</p>
+      <nav class="ftr-links">
+        <a href="https://github.com/TheDynamicPunk/Convoy">Source</a>
+        <a href="https://github.com/TheDynamicPunk/Convoy/issues">Report an issue</a>
+        <a href="https://github.com/TheDynamicPunk/Convoy/blob/main/LICENSE">GPLv3</a>
+      </nav>
+    </div>
+    <p class="fine">
+      Convoy is a general-purpose download manager. You're responsible for the
+      terms of the sites you use it with and for copyright law where you live.
+      "Convoy", its icon and its branding are not covered by the GPL. Apple, Mac
+      and macOS are trademarks of Apple Inc.; Convoy is not affiliated with,
+      endorsed by or sponsored by Apple, Google, YouTube, or any other site it
+      can download from.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* Everything that changes between releases lives here. The page is correct as
+   written with no JS: it describes the source build. Fill `asset` in after the
+   first release and the download UI takes over. release.sh can write this file
+   out as convoy/latest.json instead and this fetches it. */
+(function () {
+  'use strict';
+
+  var C = {
+    version: '1.0.0',
+    repo: 'TheDynamicPunk/Convoy',
+    tag: 'v1.0.0',
+    pkg: 'Convoy-1.0.0.pkg',
+    dmg: 'Convoy-1.0.0.dmg',
+    pkgSize: '4.2 MB',
+    dmgSize: '5.5 MB',
+    date: '25 September 2026',
+    prerelease: false
+  };
+
+  function set(id, prop, value) {
+    var el = document.getElementById(id);
+    if (el) el[prop] = value;
+  }
+
+  function apply(c) {
+    var base = 'https://github.com/' + c.repo;
+    set('lnkRepo', 'href', base);
+    set('ftrVersion', 'textContent', 'Convoy \u00b7 v' + c.version);
+    set('stateTag', 'textContent', c.prerelease ? 'Pre-release' : 'v' + c.version);
+
+    if (!c.tag || (!c.pkg && !c.dmg)) return;   // nothing published yet: leave the source-build copy
+
+    var dl = base + '/releases/download/' + c.tag + '/';
+
+    if (c.pkg) {
+      set('dlSubPkg', 'textContent', c.pkg + (c.pkgSize ? ' \u00b7 ' + c.pkgSize : '') + ' \u00b7 universal');
+      set('dlBtnPkg', 'href', dl + c.pkg);
+      var cta = document.getElementById('ctaPrimary');
+      if (cta) {
+        cta.href = dl + c.pkg;
+        cta.firstChild.textContent = 'Download for macOS';
+        set('ctaSub', 'textContent', 'Universal \u00b7 ' + (c.pkgSize || 'macOS 14+'));
+      }
+    }
+    if (c.dmg) {
+      set('dlSubDmg', 'textContent', c.dmg + (c.dmgSize ? ' \u00b7 ' + c.dmgSize : '') + ' \u00b7 universal');
+      set('dlBtnDmg', 'href', dl + c.dmg);
+    }
+
+    set('metaLine', 'innerHTML',
+      '<b>v' + c.version + '</b> \u00b7 ' + (c.prerelease ? 'pre-release \u00b7 ' : '') + c.date);
+  }
+
+  apply(C);
+
+  // Optional: let release.sh publish convoy/latest.json and this picks it up.
+  fetch('convoy/latest.json', { cache: 'no-cache' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { if (j) apply(j); })
+    .catch(function () {});
+})();
+
+/* The hero card's segmented download: one run from 25% to 80%, then it starts
+   over. The numbers under the bar are derived from the same value so they
+   never disagree with it. */
+(function () {
+  'use strict';
+  var row = document.querySelector('[data-anim="segments"]');
+  if (!row || !window.requestAnimationFrame) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var segs  = [].slice.call(row.querySelectorAll('.segs i'));
+  var pctEl = row.querySelector('[data-pct]');
+  var byEl  = row.querySelector('[data-bytes]');
+  var etaEl = row.querySelector('[data-eta]');
+  var JIT   = [1.12, 0.94, 1.06, 0.88, 1.15, 0.97, 1.03, 0.90];
+
+  var FROM = 0.25, TO = 0.80;
+  var RUN = 5000, HOLD = 1200, RESET = 600;
+  var TOTAL_GB = 3, SPEED_MBS = 11.6;
+  var t0 = null;
+
+  function ease(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+  function paint(p, dim) {
+    for (var i = 0; i < segs.length; i++) {
+      segs[i].style.setProperty('--p', Math.min(100, p * 100 * JIT[i]).toFixed(1) + '%');
+    }
+    row.style.setProperty('--segdim', dim);
+    pctEl.textContent = Math.round(p * 100) + '%';
+    byEl.textContent = (p * TOTAL_GB).toFixed(1) + ' GB / ' + TOTAL_GB.toFixed(1) + ' GB';
+    var secs = Math.max(1, Math.round((1 - p) * TOTAL_GB * 1024 / SPEED_MBS));
+    etaEl.textContent = Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2) + ' left';
+  }
+
+  function frame(ts) {
+    if (t0 === null) t0 = ts;
+    var e = ts - t0;
+    if (e <= RUN)                 paint(FROM + (TO - FROM) * ease(e / RUN), 1);
+    else if (e <= RUN + HOLD)     paint(TO, 1);
+    else if (e <= RUN + HOLD + RESET) {
+      var k = (e - RUN - HOLD) / RESET;
+      paint(TO + (FROM - TO) * ease(k), 1 - k * 0.55);
+    } else { t0 = ts; paint(FROM, 1); }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
