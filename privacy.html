@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy · Convoy</title>
+<meta name="description" content="Convoy has no accounts, no analytics and no telemetry. This page lists every network connection the app makes and what stays on your Mac.">
+<link rel="icon" href="convoy/icon.png">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a class="mark" href="/">
+      <img src="convoy/icon.png" alt="">
+      <b>Convoy</b>
+    </a>
+    <nav class="hdr-links">
+      <a href="/#features">Features</a>
+      <a href="/#install">Install</a>
+      <a href="https://github.com/TheDynamicPunk/Convoy">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap doc">
+  <p class="eyebrow">Legal</p>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Effective 7 October 2026</p>
+
+  <div class="tldr">
+    <p><b>The short version.</b> Convoy has no accounts, no analytics, no telemetry, no ads and no crash reporting. The developer never receives anything from the app: not your downloads, not your browsing, not your cookies. Your download list and settings stay on your Mac. Every network connection Convoy makes is listed below, and you can check all of it in the <a href="https://github.com/TheDynamicPunk/Convoy">source code</a>.</p>
+  </div>
+
+  <p>This policy covers the Convoy app for macOS, its browser extension, and this website. Convoy is made by an independent developer (“I”, “me”), who you can find on <a href="https://www.linkedin.com/in/gupta-ashu">LinkedIn</a>. Contact details are at the end.</p>
+
+  <h2>What stays on your Mac</h2>
+  <ul>
+    <li><b>Your download list.</b> To show your queue and resume downloads after you quit, Convoy saves each download’s address, file name, size, progress and the page it came from in <code>~/Library/Application Support/Convoy/downloads.json</code>. For video streams it can also save the request headers needed to continue, which may include that site’s cookies.</li>
+    <li><b>Your settings</b>, in the app’s standard macOS preferences.</li>
+    <li><b>The files you download</b> and any partial files from interrupted downloads, in the folder you choose. Settings → Advanced finds leftovers and deletes them when you ask.</li>
+    <li><b>Logs.</b> Convoy writes diagnostic messages to the macOS system log. URLs, file names and video titles are marked private there, so macOS hides them. The log never leaves your Mac unless you share it yourself.</li>
+  </ul>
+  <p>None of this is sent to me or anyone else. Deleting Convoy and the <code>~/Library/Application Support/Convoy</code> folder removes it.</p>
+
+  <h2>Network connections the app makes</h2>
+  <p>Convoy only connects to the internet for the four reasons below.</p>
+
+  <h3>1. The downloads you ask for</h3>
+  <p>When you start a download, Convoy connects to the server hosting that file. If the download came from your browser, it sends the same cookies, referrer and headers your browser would have sent, so downloads behind a login work. These go only to the site the download comes from, as part of that download. The site sees your IP address, like any other download, and its own privacy policy applies.</p>
+
+  <h3>2. Update checks</h3>
+  <p>Once a day, Convoy checks <code>thedynamicpunk.github.io/convoy/appcast.xml</code> for a new version. If one exists, it asks before downloading it from GitHub Releases, and installs it only if it’s signed with the project’s key. The check sends no information about your Mac beyond what any web request carries (your IP address and the app’s name and version). You can turn the daily check off in <b>Settings → General</b>.</p>
+
+  <h3>3. YouTube helpers, only if you install them</h3>
+  <p>YouTube support relies on open-source tools (<a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a> and the components it needs). Convoy doesn’t include them. If you choose to install them in <b>Settings → YouTube</b>, Convoy downloads them from those projects’ official GitHub releases and checks each file against a known SHA-256 checksum before using it. When you then download from YouTube, yt-dlp connects to YouTube, and a helper runs locally on your Mac (at <code>127.0.0.1</code>) without being reachable from the internet. Some YouTube downloads let yt-dlp read your browser’s cookies. That’s off unless you choose to use it.</p>
+
+  <h3>4. Things you open yourself</h3>
+  <p>Links in the app, such as “Report an issue”, open in your browser like any other link.</p>
+
+  <h2>The browser extension</h2>
+  <p>The extension needs broad permissions to do its job, so here is what each part does:</p>
+  <ul>
+    <li><b>Access to the pages you visit</b> lets it notice downloads and videos and add the download button over them. It reads what it needs to find media on the page. It doesn’t record your browsing history.</li>
+    <li><b>Downloads, context menus and notifications</b> let it hand downloads to Convoy, add the right-click items, and tell you when something was sent.</li>
+    <li><b>Cookies</b> (optional, and only granted if you allow it) let it pass a site’s cookies along with a download from that site.</li>
+    <li><b>Native messaging</b> is how it talks to Convoy. Everything it collects goes to the Convoy app on your Mac, through a small program inside the app, over a local connection. Both ends check that the other really is Convoy before exchanging anything.</li>
+  </ul>
+  <p>The extension stores a single setting in your browser (whether it’s catching downloads), and sends nothing to me or to any server of its own.</p>
+
+  <h2>This website</h2>
+  <p>This site is a static page hosted on <a href="https://pages.github.com/">GitHub Pages</a>. It sets no cookies and has no analytics or tracking scripts. To show a download count, your browser asks GitHub’s public API for the number of release downloads. GitHub may log technical information such as IP addresses when you visit, under the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
+
+  <h2>Third parties</h2>
+  <p>The only outside services involved are the ones described above: GitHub (website, updates and helper downloads), the sites you download from, and YouTube if you use the YouTube helpers. Each has its own privacy policy. I don’t sell, share or receive any personal data, because Convoy doesn’t send me any.</p>
+
+  <h2>Children</h2>
+  <p>Convoy doesn’t collect personal information from anyone, children included.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If Convoy’s data handling changes, this page will be updated and the effective date above will change. Its full history is public in this website’s <a href="https://github.com/TheDynamicPunk/thedynamicpunk.github.io">repository</a>. A change that sends any data off your Mac will be announced in the release notes first.</p>
+
+  <h2>Contact</h2>
+  <p>Find me on <a href="https://www.linkedin.com/in/gupta-ashu">LinkedIn</a>.<br>
+  For bugs and questions, open an issue on <a href="https://github.com/TheDynamicPunk/Convoy/issues">GitHub</a>.</p>
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr-in">
+    <p class="eyebrow">Convoy</p>
+    <nav class="ftr-links">
+      <a href="/">Home</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="https://github.com/TheDynamicPunk/Convoy">Source</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
