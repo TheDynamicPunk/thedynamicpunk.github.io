@@ -1,0 +1,13 @@
+{
+  "addons": {
+    "convoy@thedynamicpunk.github.io": {
+      "updates": [
+        {
+          "version": "1.0.3",
+          "update_link": "https://github.com/TheDynamicPunk/Convoy/releases/download/v1.1.0/convoy-1.0.3.xpi",
+          "update_hash": "sha256:6804e504b755960e88268fd1b97f18b32c7a5fef99775bbc6e64c51477c18761"
+        }
+      ]
+    }
+  }
+}
