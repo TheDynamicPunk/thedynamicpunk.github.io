@@ -6,6 +6,11 @@
           "version": "1.0.3",
           "update_link": "https://github.com/TheDynamicPunk/Convoy/releases/download/v1.1.0/convoy-1.0.3.xpi",
           "update_hash": "sha256:6804e504b755960e88268fd1b97f18b32c7a5fef99775bbc6e64c51477c18761"
+        },
+        {
+          "version": "1.0.4",
+          "update_link": "https://github.com/TheDynamicPunk/Convoy/releases/download/v1.2.0/convoy-1.0.4.xpi",
+          "update_hash": "sha256:b0f7ccfe72c6e2c177f4e30e497efede3668549dfaedf370a5dd998b25f33174"
         }
       ]
     }
