@@ -3,6 +3,14 @@
     <channel>
         <title>Convoy</title>
         <item>
+            <title>1.3.0</title>
+            <pubDate>Tue, 10 Nov 2026 02:52:29 +0530</pubDate>
+            <sparkle:version>38</sparkle:version>
+            <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.3.0/Convoy-1.3.0.zip" length="5457533" type="application/octet-stream" sparkle:edSignature="ZVwPzuddlUMA18pO6wgO9Kumh+ZP6cYHcMi7kR4fZePWUR49MKzyqtYfTQyel0lr0pC8iR/46eh/B3PLsedWAg=="/>
+        </item>
+        <item>
             <title>1.2.0</title>
             <pubDate>Tue, 03 Nov 2026 03:48:06 +0530</pubDate>
             <sparkle:version>22</sparkle:version>
