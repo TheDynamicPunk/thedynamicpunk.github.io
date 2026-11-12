@@ -27,7 +27,7 @@
 <main class="wrap doc">
   <p class="eyebrow">Legal</p>
   <h1>Privacy Policy</h1>
-  <p class="updated">Effective 7 October 2026</p>
+  <p class="updated">Effective 12 November 2026</p>
 
   <div class="tldr">
     <p><b>The short version.</b> Convoy has no accounts, no analytics, no telemetry, no ads and no crash reporting. The developer never receives anything from the app: not your downloads, not your browsing, not your cookies. Your download list and settings stay on your Mac. Every network connection Convoy makes is listed below, and you can check all of it in the <a href="https://github.com/TheDynamicPunk/Convoy">source code</a>.</p>
@@ -51,7 +51,7 @@
   <p>When you start a download, Convoy connects to the server hosting that file. If the download came from your browser, it sends the same cookies, referrer and headers your browser would have sent, so downloads behind a login work. These go only to the site the download comes from, as part of that download. The site sees your IP address, like any other download, and its own privacy policy applies.</p>
 
   <h3>2. Update checks</h3>
-  <p>Once a day, Convoy checks <code>thedynamicpunk.github.io/convoy/appcast.xml</code> for a new version. If one exists, it asks before downloading it from GitHub Releases, and installs it only if it’s signed with the project’s key. The check sends no information about your Mac beyond what any web request carries (your IP address and the app’s name and version). You can turn the daily check off in <b>Settings → General</b>.</p>
+  <p>When it opens, and every six hours while it’s running, Convoy checks <code>thedynamicpunk.github.io/convoy/appcast.xml</code> for a new version. If one exists, it asks before downloading it from GitHub Releases (unless you’ve turned on automatic installs), and installs it only if it’s signed with the project’s key. The check sends no information about your Mac beyond what any web request carries (your IP address and the app’s name and version). You can turn the automatic check off in <b>Settings → General</b>.</p>
 
   <h3>3. YouTube helpers, only if you install them</h3>
   <p>YouTube support relies on open-source tools (<a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a> and the components it needs). Convoy doesn’t include them. If you choose to install them in <b>Settings → YouTube</b>, Convoy downloads them from those projects’ official GitHub releases and checks each file against a known SHA-256 checksum before using it. When you then download from YouTube, yt-dlp connects to YouTube, and a helper runs locally on your Mac (at <code>127.0.0.1</code>) without being reachable from the internet. Some YouTube downloads let yt-dlp read your browser’s cookies. That’s off unless you choose to use it.</p>

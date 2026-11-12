@@ -3,6 +3,25 @@
     <channel>
         <title>Convoy</title>
         <item>
+            <title>1.3.1</title>
+            <pubDate>Thu, 12 Nov 2026 13:06:03 +0530</pubDate>
+            <sparkle:version>43</sparkle:version>
+            <sparkle:shortVersionString>1.3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<meta name="color-scheme" content="light dark">
+<h3>What&#x27;s new</h3>
+<ul>
+<li><strong>Faster update checks.</strong> Convoy now checks for updates when it opens and every six hours while it&#x27;s running, instead of once a day. A new <strong>Install updates automatically</strong> switch in Settings → General lets it install them without asking.</li>
+<li><strong>Clearer browser list.</strong> When several browsers share one setup, Settings → Browser and the first-launch sheet now show each installed browser&#x27;s icon beside the names.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li><strong>Brave kept asking to finish setup.</strong> Brave reads Chrome&#x27;s folder for the Convoy connection, so the file Convoy wrote to Brave&#x27;s own folder was never found. Brave now shares Chrome&#x27;s file and appears in the same row as Chrome and Arc. If you set Brave up with an earlier version, Convoy moves the file for you the next time it opens.</li>
+</ul>
+]]></description>
+            <enclosure url="https://github.com/TheDynamicPunk/Convoy/releases/download/v1.3.1/Convoy-1.3.1.zip" length="5472090" type="application/octet-stream" sparkle:edSignature="dDKi+QA+fCEaXvAGPxuiqfspMd6A/HzaTKVQHfyOLePPOo7jvpYx/hn4NVk0l2Ieo/Hsf/LrA1xpmh+Wzg/lCg=="/>
+        </item>
+        <item>
             <title>1.3.0</title>
             <pubDate>Tue, 10 Nov 2026 02:52:29 +0530</pubDate>
             <sparkle:version>38</sparkle:version>
